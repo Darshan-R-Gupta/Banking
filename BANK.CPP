@@ -27,7 +27,6 @@
 /*						Avion Bank 	      */
 /*						7046393537            */
 /*____________________________________________________________________*/
-//test comment
 #include <iostream.h>
 #include <math.h>
 #include <ctype.h>
