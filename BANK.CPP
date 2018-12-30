@@ -120,7 +120,7 @@ public:
 	Bank();
 	void login();
 	void signin();
-	void deposit(user *dep = NULL);
+	void deposit(user *ud);
 	void withdraw(user *u);
 	void change_pass(user *u);
 	void change_creden(user *u);
@@ -255,7 +255,6 @@ void Bank::login(){
 	}
 }
 void Bank::review_acc(user *u){
-	int matched = 0;
 	cout<<"Account no.: "<<u->get_acc_no()<<endl;
 	cout<<"Name: ";
 	puts(u->name);
@@ -406,9 +405,9 @@ void Bank::forgot_pass(char c){
 					getch();
 					clrscr();
 					if(c == 'L')	b1.login();
-					else if(c == 'C')	b1.change_creden(acc_no);
-					else if(c == 'R')	b1.remove_acc();
-					else if(c == 'W')	b1.withdraw(u[i].get_acc_no());
+					else if(c == 'C')	change_creden(&u[i]);
+					else if(c == 'R')	remove_acc();
+					else if(c == 'W')	withdraw(&u[i]);
 					else{};
 					break;
 				}
@@ -479,7 +478,7 @@ void Bank::change_pass(user *u){
 			goto aad;
 		}
 	}
-	if(strcmp(u[i].aadhar, aad_no) == 0){
+	if(strcmp(u->aadhar, aad_no) == 0){
 		cout<<"Enter New password: ";
 		cin>>new_pass;
 		if(u->change_password(old_pass,new_pass) == 1){
@@ -631,7 +630,7 @@ void disp_user(user *u){
 	cin>>choice;
 	switch(choice){
 		case 1:
-			b1.change_creden(u));
+			b1.change_creden(u);
 			break;
 		case 2:
 			b1.review_acc(u);
