@@ -120,12 +120,12 @@ public:
 	Bank();
 	void login();
 	void signin();
-	void deposit(int dep_acc);
-	void withdraw(int acc_no);
-	void change_pass(int acc);
-	void change_creden(int acc);
+	void deposit(user *dep = NULL);
+	void withdraw(user *u);
+	void change_pass(user *u);
+	void change_creden(user *u);
 	void forgot_pass(char c);
-	void review_acc(int acc);
+	void review_acc(user *u);
 	void remove_acc();
 };
 int Bank::accounts;
@@ -141,8 +141,7 @@ void main(){
 	disp_home();
 	update();
 }
-void Bank::signin()
-{
+void Bank::signin(){
 	char nm[50],pass[20];
 	double balance;
 	int acc_no;
@@ -255,33 +254,19 @@ void Bank::login(){
 		 disp_home();
 	}
 }
-void Bank::review_acc(int acc){
+void Bank::review_acc(user *u){
 	int matched = 0;
-	for(int i = 0; i < max_users; i++){
-		if(u[i].get_acc_no() == acc){
-			cout<<"Account no.: "<<u[i].get_acc_no()<<endl;
-			cout<<"Name: ";
-			puts(u[i].name);
-			cout<<"Aadhar no.: ";
-			puts(u[i].aadhar);
-			cout<<"Current Balance: ";
-			disp_money(u[i].get_bal());
-			matched = 1;
-			break;
-		}
-	}
-	if(!matched){
-		cout<<"Sorry, we couldn't find you! "<<endl;
-		getch();
-		disp_home();
-	}
-	else{
-		getch();
-		disp_user(&u[i]);
-	};
-
+	cout<<"Account no.: "<<u->get_acc_no()<<endl;
+	cout<<"Name: ";
+	puts(u->name);
+	cout<<"Aadhar no.: ";
+	puts(u->aadhar);
+	cout<<"Current Balance: ";
+	disp_money(u->get_bal());
+	getch();
+	disp_user(u);
 }
-void Bank::deposit(int dep_acc = 0){
+void Bank::deposit(user *ud = NULL){
 	int i;
 	int acc;
 	float money;
@@ -292,25 +277,20 @@ void Bank::deposit(int dep_acc = 0){
 	cin>>acc;
 	cout<<"Enter Money to deposit: ";
 	cin>>money;
-	//to check whether given acc_no exists
+	//to check acc_no of creditor exists
 	for(i = 0; i < max_users; i++) {
 		if(u[i].get_acc_no() == acc){
 			matched = 1;
 			break;
 		 }
 	}
-	if(dep_acc == 0){//If the depositor isn't a existing user
+	if(!ud){//If the depositor isn't a existing user
 		char depositor[20];
 		cout<<"Enter the name of depositor: ";
 		gets(depositor);
 		gen_format(depositor);
 		u[i].add_bal(money);
-		if(matched != 1){
-			 cout<<"Invalid Account no. "<<endl;
-			 getch();
-			 disp_home();
-		}
-		else{
+		if(matched == 1){
 			cout<<"The money has been succesfully deposited to:\n";
 			cout<<"Account No: "<<u[i].get_acc_no()<<endl;
 			cout<<"Account Name: ";
@@ -318,83 +298,78 @@ void Bank::deposit(int dep_acc = 0){
 			cout<<"By: "<<depositor<<endl;
 			getch();
 			disp_home();
-		};
+		}
+		else{
+			cout<<"Invalid Account no. "<<endl;
+			getch();
+			disp_home();
+	  	}
 	}
 	else
-	{
-		//get depositors acc_no
-		for(int k = 0; k < max_users; k++){
-			if(u[k].get_acc_no() == dep_acc){
-				break;
-			}
-		}
+	{//If depositor is an existing user
 		if(matched != 1){ //if creditor's account is not found
 			cout<<"The account no in which you are trying to deposit is incorrect. Please try again"<<endl;
 			getch();
-			disp_user(&u[k]);
+			disp_user(ud);
 		}
-		if(u[i].get_acc_no() == u[k].get_acc_no()) {
+		if(ud->get_acc_no() == acc) {
 		   //If you deposit to your own account
-			u[k].add_bal(money);
+			ud->add_bal(money);
 			cout<<"The money has been succesfully deposited to:\n";
-			cout<<"Account No: "<<u[i].get_acc_no()<<endl;
+			cout<<"Account No: "<<ud->get_acc_no()<<endl;
 			cout<<"Name: ";
-			puts(u[i].name);
-			cout<<"By: "<<u[k].name<<endl;
+			puts(ud->name);
+			cout<<"By: "<<ud->name<<endl;
 			cout<<"Current Balance: ";
-			disp_money(u[i].get_bal());
+			disp_money(ud->get_bal());
 			getch();
-			disp_user(&u[k]);
+			disp_user(ud);
 		}
 		else{ //if you deposit to someone's account
-			if(u[k].remove_bal(money) == 1){
+			if(ud->remove_bal(money) == 1){
 				u[i].add_bal(money);
 				cout<<"The money has been succesfully deposited to:\n";
 				cout<<"Account No: "<<u[i].get_acc_no()<<endl;
 				cout<<"Name: ";
 				puts(u[i].name);
-				cout<<"By: "<<u[k].name<<endl;
+				cout<<"By: "<<ud->name<<endl;
 				cout<<"Balance Remaining: ";
-				disp_money(u[k].get_bal());
+				disp_money(ud->get_bal());
 				getch();
-				disp_user(&u[k]);
+				disp_user(ud);
 			}
 			else{
 				cout<<"Insufficient balance! "<<endl;
 				cout<<"Current Balance: ";
-				disp_money(u[k].get_bal());
+				disp_money(ud->get_bal());
 				getch();
-				disp_user(&u[k]);
+				disp_user(ud);
 			};
 		}
 
 	};
 
 }
-void Bank::withdraw(int acc_no){
+void Bank::withdraw(user *u){
 	clrscr();
 	cout<<"WITHDRAW: "<<endl;
-	for(int i = 0; i < max_users; i++){
-		if(u[i].get_acc_no() == acc_no){
-		     cout<<"Enter Amount of money: ";
-		     float money = 0;
-		     cin>>money;
-		     if(u[i].remove_bal(money) == 0){
-				cout<<"Insufficient balance! "<<endl;
-				cout<<"Current Balance: ";
-				disp_money(u[i].get_bal());
-				getch();
-				disp_user(&u[i]);
-		     }
-		     else{
-			cout<<"Withdraw Successfull! "<<endl;
-			cout<<"Balance Remaining: ";
-			disp_money(u[i].get_bal());
+   cout<<"Enter Amount of money: ";
+   float money = 0;
+   cin>>money;
+   if(u->remove_bal(money) == 0){
+			cout<<"Insufficient balance! "<<endl;
+			cout<<"Current Balance: ";
+			disp_money(u->get_bal());
 			getch();
-			disp_user(&u[i]);
-		     };
-		}
-	}
+			disp_user(u);
+   }
+	else{
+	 		cout<<"Withdraw Successfull! "<<endl;
+			cout<<"Balance Remaining: ";
+			disp_money(u->get_bal());
+			getch();
+			disp_user(u);
+	};
 }
 void Bank::forgot_pass(char c){
 	char last_pass[20];
@@ -447,15 +422,10 @@ void Bank::forgot_pass(char c){
 		disp_home();
 	}
 }
-void Bank::change_creden(int acc)
+void Bank::change_creden(user *u)
 {
 	int choice;
 	clrscr();
-	for(int i =0; i < max_users; i++){
-		if(u[i].get_acc_no() == acc){
-			break;
-		}
-	}
 	cout<<"CHANGE YOUR CREDENTIALS: "<<endl;
 	cout<<"Please press what you want to change: "<<endl;
 	cout<<"1. Name"<<endl;
@@ -468,38 +438,32 @@ void Bank::change_creden(int acc)
 			cout<<"Enter new name: ";
 			gets(new_name);
 			gen_format(new_name); //for generalized format
-			strcpy(u[i].name, new_name);
+			strcpy(u->name, new_name);
 			cout<<"Account Successfully renamed! "<<endl;
 			cout<<"New name: ";
-			puts(u[i].name);
+			puts(u->name);
 			getch();
-			disp_user(&u[i]);
+			disp_user(u);
 			break;
 		case 2:
-			change_pass(acc);
+			change_pass(u);
 			getch();
 			disp_home();
 			break;
 		case 3:
 			clrscr();
-			disp_user(&u[i]);
+			disp_user(u);
 			break;
 		default:
 			cout<<"Invalid choice! ";
 			getch();
 			//To go back
-			disp_user(&u[i]);
+			disp_user(u);
 	}
 
 }
-void Bank::change_pass(int acc){
+void Bank::change_pass(user *u){
 	clrscr();
-	for(int i = 0; i < max_users; i++){
-		if(u[i].get_acc_no() == acc)
-		{
-			break;
-		}
-	}
 	char old_pass[20];
 	char new_pass[20];
 	char aad_no[13];
@@ -518,7 +482,7 @@ void Bank::change_pass(int acc){
 	if(strcmp(u[i].aadhar, aad_no) == 0){
 		cout<<"Enter New password: ";
 		cin>>new_pass;
-		if(u[i].change_password(old_pass,new_pass) == 1){
+		if(u->change_password(old_pass,new_pass) == 1){
 			cout<<"Password changed! "<<endl;
 		}
 		else{
@@ -527,17 +491,17 @@ void Bank::change_pass(int acc){
 			char choice;
 			cin>>choice;
 			if(choice == 'Y' || choice == 'y'){
-				b1.forgot_pass('C');
+				forgot_pass('C');
 			}
 			else{
-				change_creden(acc);
+				change_creden(u);
 			};
 		};
 	}
 	else{
 		cout<<"Aadhar no was incorrect! "<<endl;
 		getch();
-		change_creden(acc);
+		change_creden(u);
 	};
 }
 Bank::Bank(){
@@ -567,7 +531,6 @@ void Bank::remove_acc()
 	p:
 	cout<<"Enter Password: ";
 	cin>>pass;
-
 	int i = 0;
 	for(i = 0; i < max_users; i++){
 		if(u[i].get_acc_no() == acc)
@@ -576,10 +539,7 @@ void Bank::remove_acc()
 				char temp;
 				cout<<"(Y/N)Are you sure :( ";
 				cin>>temp;
-				if(temp  >= 97){
-					temp -= 32;
-				}
-				if(temp == 'Y'){
+				if(temp == 'Y' || temp == 'y'){
 					u[i].user::user();
 					cout<<"Account Removed."<<endl;
 					change_no_of_acc(-1);
@@ -593,11 +553,11 @@ void Bank::remove_acc()
 			}
 			else{
 				cout<<"Invalid password!"<<endl;
-				cout<<"Forgot password? "<<endl;
+				cout<<"Forgot? "<<endl;
 				char choice;
 				cin>>choice;
 				if(choice == 'y' || choice == 'Y'){
-					b1.forgot_pass('R');
+					forgot_pass('R');
 				}
 				else{
 					goto p;
@@ -605,10 +565,7 @@ void Bank::remove_acc()
 			}
 		}
 	}
-	cout<<"No such account exists! "<<endl;
-	getch();
 	disp_home();
-
 }
 void disp_home()
 {
@@ -674,16 +631,16 @@ void disp_user(user *u){
 	cin>>choice;
 	switch(choice){
 		case 1:
-			b1.change_creden(u->get_acc_no());
+			b1.change_creden(u));
 			break;
 		case 2:
-			b1.review_acc(u->get_acc_no());
+			b1.review_acc(u);
 			break;
 		case 3:
-			b1.withdraw(u->get_acc_no());
+			b1.withdraw(u);
 			break;
 		case 4:
-			b1.deposit(u->get_acc_no());
+			b1.deposit(u);
 			break;
 		case 5:
 			b1.remove_acc();
