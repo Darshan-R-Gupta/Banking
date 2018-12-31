@@ -130,14 +130,8 @@ public:
 };
 int Bank::accounts;
 Bank b1;
-void ini_acc(){
-	fstream e;
-	e.open("Avion\\Accounts.txt", ios::in);
-	e>>Bank::accounts;
-}
 void main(){
 	clrscr();
-	ini_acc();
 	disp_home();
 	update();
 }
@@ -302,7 +296,7 @@ void Bank::deposit(user *ud = NULL){
 			cout<<"Invalid Account no. "<<endl;
 			getch();
 			disp_home();
-	  	}
+		}
 	}
 	else
 	{//If depositor is an existing user
@@ -363,7 +357,7 @@ void Bank::withdraw(user *u){
 			disp_user(u);
    }
 	else{
-	 		cout<<"Withdraw Successfull! "<<endl;
+			cout<<"Withdraw Successfull! "<<endl;
 			cout<<"Balance Remaining: ";
 			disp_money(u->get_bal());
 			getch();
@@ -508,6 +502,12 @@ Bank::Bank(){
 	fstream f1;
 	f1.open("Avion\\Bank.dat", ios::in);
 	f1.read((char *) & b1, sizeof(b1));
+	f1.close();
+
+	fstream e;
+	e.open("Avion\\Accounts.txt", ios::in);
+	e>>Bank::accounts;
+	e.close();
 }
 void update(){
 	//function to update files
@@ -570,7 +570,6 @@ void disp_home()
 {
 	start:
 	clrscr();
-	update();
 	cout<<"";
 	cout<<"\t\t\t   WELCOME TO AVION BANK "<<endl;
 	cout<<"";
@@ -597,7 +596,8 @@ void disp_home()
 			b1.remove_acc();
 			break;
 		case 5:
-			return;
+			update();
+			exit(0);
 		default:
 			cout<<"Invalid choice!"<<endl;
 			getch();
